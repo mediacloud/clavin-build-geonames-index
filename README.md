@@ -3,8 +3,8 @@ Build [CLAVIN GeoNames.org index](https://github.com/Berico-Technologies/CLAVIN)
 To make a new release:
 
 ```
-git flow release start YYYY-mm-dd
-git flow release finish YYYY-mm-dd
+git flow release start $(date +%F)
+git flow release finish $(date +%F)
 git push -u origin develop
 git push -u origin master
 git push --tags
