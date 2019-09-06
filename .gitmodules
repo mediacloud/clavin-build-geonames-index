@@ -1,0 +1,3 @@
+[submodule "CLAVIN"]
+	path = CLAVIN
+	url = https://github.com/Berico-Technologies/CLAVIN.git
