@@ -8,22 +8,30 @@ addons:
 env:
   - MAVEN_OPTS="-Xmx4g"
 
-script:
-
-  - cd CLAVIN/
+install:
 
   # Download the latest version of allCountries.zip gazetteer file from GeoNames.org
   - curl -O http://download.geonames.org/export/dump/allCountries.zip
   - unzip allCountries.zip
   - rm allCountries.zip
+  - mv allCountries.txt CLAVIN/
 
   # Build CLAVIN
+  - cd CLAVIN/
   - mvn compile
+  - cd ../  
+
+script:
 
   # Create the Lucene index
+  - cd CLAVIN/
   - mvn exec:java -Dexec.mainClass="com.bericotech.clavin.index.IndexDirectoryBuilder"
+  - cd ../
+
+after_success:
 
   # Compress index directory
+  - cd CLAVIN/
   - tar -cf ../IndexDirectory.tar IndexDirectory/
   - cd ../
   - pv IndexDirectory.tar | gzip -v9 > IndexDirectory.tar.gz
