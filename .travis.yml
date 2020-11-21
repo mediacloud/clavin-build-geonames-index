@@ -19,13 +19,15 @@ install:
   # Build CLAVIN
   - cd CLAVIN/
   - mvn compile
-  - cd ../  
+  - cd ../ 
+  - mv ./logback.xml ./CLAVIN/target/classes/logback.xml
 
 script:
 
-  # Create the Lucene index
+  # Create the Lucene index, using travis_wait bc log level is set to warning (not info). Travis will
+  # shut down a build if there's no logging output for 10 minutes, and this step can take 30+ min.
   - cd CLAVIN/
-  - mvn exec:java -Dexec.mainClass="com.bericotech.clavin.index.IndexDirectoryBuilder"
+  - travis_wait 45 mvn exec:java -Dexec.mainClass="com.bericotech.clavin.index.IndexDirectoryBuilder"
   - cd ../
 
 after_success:

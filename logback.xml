@@ -1,0 +1,16 @@
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- patch for clavin submodule, whose logging is so verbose when level="info" that it exceeds
+       travis's max log length and the build fails. we mv this file into the submodule during
+       the build via .travis.yml -->
+  <root level="warn">
+    <appender-ref ref="STDOUT" />
+  </root>
