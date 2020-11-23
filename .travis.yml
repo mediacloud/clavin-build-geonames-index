@@ -37,6 +37,8 @@ after_success:
   - tar -cf ../IndexDirectory.tar IndexDirectory/
   - cd ../
   - pv IndexDirectory.tar | gzip -v9 > IndexDirectory.tar.gz
+  - echo 'Resulting tarball is' $(du -h IndexDirectory.tar.gz | cut -f 1) '; should be 900M at minimum'
+  - if [ $(du -k IndexDirectory.tar.gz | cut -f 1) -le $((1024 * 900)) ]; then echo "Resulting tarball is too small; build failed"; exit 1; fi
 
 deploy:
   provider: releases
