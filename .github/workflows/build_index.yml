@@ -23,11 +23,13 @@ jobs:
         with:
           python-version: 3.5
 
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
       - name: Update APT listing
         run: sudo apt-get -y update
-
-      - name: Install Java
-        run: sudo apt-get -y install default-jre
 
       - name: Install utility packages
         run: sudo apt-get -y install pv unzip
