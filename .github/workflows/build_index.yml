@@ -28,6 +28,12 @@ jobs:
         with:
           java-version: 11
 
+      - name: Print tool versions
+        run: |
+          java --version
+          mvn --version
+          if [ -d ~/.m2/ ]; then find ~/.m2/; done
+
       - name: Update APT listing
         run: sudo apt-get -y update
 
