@@ -12,13 +12,43 @@ env:
     # GITHUB_PERSONAL_ACCESS_TOKEN
     - secure: "CyMVMJtaN09m0fhX5z71vL90/9M8T53zjM0K6rRL0RreFSn/j7as7Di5y5V3ecjrWDf9b3xqLnVdv9He5KOMTj8yq4wwq3LZ7CcnEvC8YyvpLsfJtuSMpWDo2+dgYBcVnAhzu8qfErByO3inuZDTGm4EyTdRvQpcunBxX/i8bsjqv9nTQRRDMy03fLLyHNhXdD5lWPd094/FRTNRdZvoi7WfUId1pbFB4975DW7lPghVwxEo6+p0FiqrIWw/cd1nkZ5UNxnk6rImBOsNuSw+39Kf4Gz0kFJV/GzpQQLt1XUyXzk0xzYFWYjTF6cp/W2Wh9xXzVxXXns/COJxgr+7u3eBKC5FzVOv/nwzp7s8elkzMcVzzabeimG8oXEwytgL1zg5GwMRo1k4c7Ek8RzBxPpWzWuHY465I3S6Xq70Cjh0jJDyfd/E8hzVj3iQxEweLlK9nZow2qXlhSJgIx/3LG+O2MYMOnixPn7APleeexmIu803cwxaTxgXp5VpwRNOFeIT0O3fNuB9H5lwqQpeK5gUtccnSevjCTCJafxm+ZL+7tStV3EF4gkw43a6Wkv8//12f17eq5sGAOewe18jzAlA/nkNmDLFIB/BfpC4CxE3X/Disl10ZDCV3Y8o8Muy0F7HVHkFn5lFt3JXTPcunIFnYC+c+ZWUo5PBz62Qc5w="
 
+install:
+
+  # Download the latest version of allCountries.zip gazetteer file from GeoNames.org
+  - curl -O http://download.geonames.org/export/dump/allCountries.zip
+  - unzip allCountries.zip
+  - rm allCountries.zip
+  - mv allCountries.txt CLAVIN/
+
+  # Build CLAVIN
+  - cd CLAVIN/
+  - mvn compile
+  - cd ../ 
+  - mv ./logback.xml ./CLAVIN/target/classes/logback.xml
+
 script:
 
-  - echo test > test.txt
+  # Create the Lucene index, using travis_wait bc log level is set to warning (not info). Travis will
+  # shut down a build if there's no logging output for 10 minutes, and this step can take 30+ min.
+  - cd CLAVIN/
+  - travis_wait 45 mvn exec:java -Dexec.mainClass="com.bericotech.clavin.index.IndexDirectoryBuilder"
+  - cd ../
+
+after_success:
+
+  # Compress index directory
+  - cd CLAVIN/
+  - tar -cf ../IndexDirectory.tar IndexDirectory/
+  - cd ../
+  - pv IndexDirectory.tar | gzip -v9 > IndexDirectory.tar.gz
+  - echo 'Resulting tarball is' $(du -h IndexDirectory.tar.gz | cut -f 1) '; should be 900M at minimum'
+  - if [ $(du -k IndexDirectory.tar.gz | cut -f 1) -le $((1024 * 900)) ]; then echo "Resulting tarball is too small; build failed"; exit 1; fi
 
 deploy:
   provider: releases
   api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
-  file: "test.txt"
+  file: "IndexDirectory.tar.gz"
   skip_cleanup: true
   overwrite: true
+  on:
+    tags: true
