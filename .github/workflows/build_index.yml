@@ -4,9 +4,9 @@ on: [push]
 
 jobs:
 
-  create_pkg:
+  build_release:
 
-    name: Create package
+    name: Build index, release package
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
 
