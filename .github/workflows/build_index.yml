@@ -32,7 +32,7 @@ jobs:
         run: |
           java --version
           mvn --version
-          if [ -d ~/.m2/ ]; then find ~/.m2/; done
+          if [ -d ~/.m2/ ]; then find ~/.m2/; fi
 
       # https://stackoverflow.com/a/59936630/200603
       - name: Set up Maven to fetch from HTTPS repository
