@@ -8,44 +8,14 @@ addons:
 env:
   - MAVEN_OPTS="-Xmx4g"
 
-install:
-
-  # Download the latest version of allCountries.zip gazetteer file from GeoNames.org
-  - curl -O http://download.geonames.org/export/dump/allCountries.zip
-  - unzip allCountries.zip
-  - rm allCountries.zip
-  - mv allCountries.txt CLAVIN/
-
-  # Build CLAVIN
-  - cd CLAVIN/
-  - mvn compile
-  - cd ../ 
-  - mv ./logback.xml ./CLAVIN/target/classes/logback.xml
-
 script:
 
-  # Create the Lucene index, using travis_wait bc log level is set to warning (not info). Travis will
-  # shut down a build if there's no logging output for 10 minutes, and this step can take 30+ min.
-  - cd CLAVIN/
-  - travis_wait 45 mvn exec:java -Dexec.mainClass="com.bericotech.clavin.index.IndexDirectoryBuilder"
-  - cd ../
-
-after_success:
-
-  # Compress index directory
-  - cd CLAVIN/
-  - tar -cf ../IndexDirectory.tar IndexDirectory/
-  - cd ../
-  - pv IndexDirectory.tar | gzip -v9 > IndexDirectory.tar.gz
-  - echo 'Resulting tarball is' $(du -h IndexDirectory.tar.gz | cut -f 1) '; should be 900M at minimum'
-  - if [ $(du -k IndexDirectory.tar.gz | cut -f 1) -le $((1024 * 900)) ]; then echo "Resulting tarball is too small; build failed"; exit 1; fi
+  - echo test > test.txt
 
 deploy:
   provider: releases
   api_key:
     secure: "gAhzkjUix77ssnT1AmCjr9/rkpixMapITVF07poXaupNyySoWxv8EMQoI7FCw7kkVcjgvRpZny4juFKl2x5F/7m0Lg2V+6QmBzK5/P+ZLwCCjbldjomdquIDhRoAUbYIsFfYXODlz8Dv+XzcbienAYQHb4+OeKXBbvo22VCfGzLHSswWpQxID5K6c361dPBSv5weB5osUnnLnLq7fJbmemojoJQr1E9bSY+5hGG7tCcQh2IudHo/EHSC/pBXCijeIa6FochkRS5owVt+hjyw6ZuGFRW1ozqlB7P82LSt/vh+z2X+4rDFvIE0r/dDJg1PuwmjFK2gQZk+Cmrts5lIy54EUoWrpYL4zwWttCTdllgO0MMlBBJSuvglrnNbNKt2l/nB7L5mCJm+VlcL2HqGSPpbKrd1cL8jwV69XBvUYsPcsQj7dDZxjKPUrq1QZrKza7tHCoZArq7KwhpCdRWmzmqeHaVLfN6169uFzqL2wr9BtYNjcEd0wnnj7TvkQhCtzZBdbzRvxWyzJSjta1q4qshLGkf3OsBTi+H65bd2okR4sN5CcAVnE/PzLOy25d6ZYsQb0d8T8rIdBLMTRi25CBL7goVQTUR3j3bWf+GbwVyfAgjsIHo2RLeJTmApsWbRf6MAi/MiW/mv1qf566chTYHJdLCQQZz12BLb0tPaRcA="
-  file: "IndexDirectory.tar.gz"
+  file: "test.txt"
   skip_cleanup: true
   overwrite: true
-  on:
-    tags: true
